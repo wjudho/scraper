@@ -102,7 +102,11 @@ def get_next_page_url(html: HTMLParser) -> dict:
     return {"href": False}
 
 @retry
-def get_pages(client: httpx.Client, url: str, image_dir: str, base_url: str, page_number: int = 1) -> None:
+def get_pages(client: httpx.Client, url: str, image_dir: str, base_url: str, page_number: int = 1, max_recursion_depth=100) -> None:
+    if max_recursion_depth <= 0:
+        logger.error("Maximum recursion depth reached. Stopping further recursion.")
+        return
+    
     start_time = time.time()
     try:
         response = client.get(url, headers=headers)
@@ -118,7 +122,7 @@ def get_pages(client: httpx.Client, url: str, image_dir: str, base_url: str, pag
         logger.error(f"Failed to fetch page: {e}")
 
 def main() -> None:
-    url = "https://www.mgeko.cc/reader/en/genius-corpse-collecting-warrior-chapter-1-eng-li/"
+    url = "https://www.mgeko.cc/reader/en/it-all-starts-with-trillions-of-nether-currency-chapter-82-eng-li/"
     # Current Working Directory
     os.chdir("D:/manga")
     # Folder will be rename according to url
