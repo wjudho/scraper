@@ -2,8 +2,11 @@ import httpx
 from selectolax.parser import HTMLParser
 import os
 import ssl
+import random
+import time
 
-url = "https://mangatale.co/apocalyptic-chef-awakening-chapter-03/"
+
+url = "https://mangatale.co/apocalyptic-chef-awakening-chapter-04/"
 headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0"}
 
 # Set up SSL/TLS certificates using certifi
@@ -31,11 +34,18 @@ def main():
         filepath_jpg = os.path.join(filepath_folder, filename)
         
         if not os.path.exists(filepath_jpg):    
-            r2 = client.get(image_link, headers=headers)
+            timeout = random.randint(5, 30)
+            r2 = client.get(image_link, headers=headers, timeout=timeout)
             with open(filepath_jpg, 'wb') as f:
                 f.write(r2.content)
             print(f"Downloaded {filename}")
+            
+            delay = random.randint(1, 10)
+            time.sleep(delay)
+            print(f"Waiting for {delay} seconds....")
         else:
             print(f"Skipping {filename}, already exists")
+        
+        
 if __name__ == "__main__":
     main()
