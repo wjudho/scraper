@@ -44,7 +44,7 @@ def main(url):
             with sync_playwright() as p:
                 browser = p.chromium.launch(args=["--trust-certificate=mangatale.co.crt"])
                 page = browser.new_page()
-                page.goto(url)
+                page.goto(url, timeout=60000)
                 try:
                     page.locator("a.ch-next-btn").first.click()
                     next_page_url = page.url
@@ -68,7 +68,7 @@ def main(url):
             
 if __name__ == "__main__":
     # url = "https://mangatale.co/apocalyptic-chef-awakening-chapter-01/"
-    url = "https://mangatale.co/reincarnated-as-a-new-employee-chapter-01/"
+    url = "https://mangatale.co/reincarnated-as-a-new-employee-chapter-21/"
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0"}
     ssl_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
     ssl_context.options |= ssl.OP_NO_TLSv1
