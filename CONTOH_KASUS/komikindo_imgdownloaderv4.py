@@ -7,8 +7,20 @@ import time
 from urllib.parse import urljoin, urlparse
 from playwright.sync_api import sync_playwright
 import logging
+import tenacity
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+@tenacity.retry(wait=tenacity.wait_exponential(multiplier=1, min=4, max=10))
+def get_url(client, url, headers):
+    try:
+        r = client.get(url, headers=headers)
+        r.raise_for_status()
+        return r
+    except (httpx.TimeoutError, httpx.RequestError) as e:
+        logging.error(f"Error occured: {e}")
+        raise
+
 def main(url):
     folder_title = url.split("/")[-2].split("-chapter-")[0].replace("-", " ")
     folder_title_path = os.path.join(r"D:\manga", folder_title)
@@ -44,7 +56,11 @@ def main(url):
             with sync_playwright() as p:
                 browser = p.chromium.launch(args=["--trust-certificate=mangatale.co.crt"])
                 page = browser.new_page()
-                page.goto(url, timeout=60000)
+                try:
+                    page.goto(url, timeout=60000)
+                except TimeoutError as e:
+                    logging.error(f"Error occured: {e}")
+                    break
                 try:
                     page.locator("a.ch-next-btn").first.click()
                     next_page_url = page.url
@@ -68,7 +84,7 @@ def main(url):
             
 if __name__ == "__main__":
     # url = "https://mangatale.co/apocalyptic-chef-awakening-chapter-01/"
-    url = "https://mangatale.co/reincarnated-as-a-new-employee-chapter-21/"
+    url = "https://mangatale.co/reincarnated-as-a-new-employee-chapter-22/"
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0"}
     ssl_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
     ssl_context.options |= ssl.OP_NO_TLSv1
